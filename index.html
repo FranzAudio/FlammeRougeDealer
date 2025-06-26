@@ -12,12 +12,12 @@
     .team { position: relative; background: #fff; border-radius: 10px; padding: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); overflow: hidden; }
     .team::before { content: ""; position: absolute; top:0; left:0; width:100%; height:100%; background-size:cover; background-position:center; opacity:0.08; z-index:0; }
     .team * { position: relative; z-index:1; }
-    .team.Red::before   { background-image: url('https://images.unsplash.com/photo-1508609349937-5ec4ae374ebf'); }
-    .team.Black::before { background-image: url('https://images.unsplash.com/photo-1516455590571-18256e5bb9ff'); }
-    .team.Green::before { background-image: url('https://images.unsplash.com/photo-1523978591478-c753949ff840'); }
-    .team.Blue::before  { background-image: url('https://images.unsplash.com/photo-1590058910445-77e38b1d47d0'); }
-    .team.Pink::before  { background-image: url('https://images.unsplash.com/photo-1600442304824-8e9b4f3c7123'); }
-    .team.White::before { background-image: url('https://images.unsplash.com/photo-1595433562696-59b4b157105d'); }
+    .team.Red::before   { background-image: url('https://i.ytimg.com/vi/j8R8peRHStY/maxresdefault.jpg'); }
+    .team.Black::before { background-image: url('https://pbs.twimg.com/media/EZlgJl8X0AMznYL.jpg'); }
+    .team.Green::before { background-image: url('https://www.francetvinfo.fr/pictures/8jzOME-7ET4Dc7HRNpDHP8D0bRY/1200x900/2016/07/18/phpa1Ynzx_1.jpg'); }
+    .team.Blue::before  { background-image: url('https://img.ilgcdn.com/sites/default/files/foto/2018/06/14/1528971050-francesco-moser-1979.jpg'); }
+    .team.Pink::before  { background-image: url('https://i.pinimg.com/736x/a6/99/52/a6995227fab85fd8c67c01deb4196c63.jpg'); }
+    .team.White::before { background-image: url('https://i.pinimg.com/736x/ac/80/57/ac8057d326815682c89a97771572177d.jpg'); }
     .team-header { padding: 10px; color: #fff; font-weight: bold; text-align: center; border-radius: 6px; margin-bottom: 10px; }
     .cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
     .card { background: #eee; padding: 10px 15px; border-radius: 6px; cursor: pointer; user-select: none; }
@@ -127,17 +127,36 @@
     function drawHuman(team, type) {
       const other = type === 'rouleur' ? 'sprinteur' : 'rouleur';
       const otherRider = state[team][other];
-      // Only block drawing if the other rider has already drawn and not played
+
+      // Rule: Cannot draw if the other rider has drawn and not played yet
       if (otherRider && otherRider.hand.length > 0 && otherRider.played === null) {
         alert(`You must play the ${other} card before drawing for the ${type}.`);
         return;
       }
+
       const rider = state[team][type];
-      if (rider.draw.length < 4) {
+      const cardsToDraw = 4;
+      let hand = [];
+
+      // 1. Try drawing from the draw pile
+      while (hand.length < cardsToDraw && rider.draw.length > 0) {
+        hand.push(rider.draw.shift());
+      }
+
+      // 2. If not enough cards, reshuffle discard into draw
+      if (hand.length < cardsToDraw && rider.discard.length > 0) {
         rider.draw = shuffle(rider.discard);
         rider.discard = [];
+
+        // 3. Draw remaining needed cards
+        while (hand.length < cardsToDraw && rider.draw.length > 0) {
+          hand.push(rider.draw.shift());
+        }
       }
-      rider.hand = rider.draw.splice(0, 4);
+
+      rider.hand = hand;
+
+      // Display logic
       const cardsDiv = $id(`${team}-${type}-cards`);
       cardsDiv.innerHTML = '';
       rider.hand.forEach((card, idx) => {
@@ -147,6 +166,7 @@
         div.onclick = () => playCard(team, type, idx);
         cardsDiv.appendChild(div);
       });
+
       $id(`${team}-${type}-played`).innerText = '';
       updateInfo(team, type);
       checkEndOfTurn();
