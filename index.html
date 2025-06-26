@@ -28,7 +28,7 @@
   </style>
 </head>
 <body>
-  <h1>Flamme Rouge - Card Dealer (6 Teams)</h1>
+  <h1>Flamme Rouge Card Dealer</h1>
   <div id="game-interface" style="display:none;">
     <div id="turn-display" style="text-align:center;font-weight:bold;margin-bottom:10px; display: none;">
       Turn: <span id="turn-counter">1</span>
@@ -147,7 +147,7 @@
         hand.push(rider.draw.shift());
       }
 
-      // 2. If not enough cards, reshuffle discard into draw
+      // 2. If there are not enough cards, reshuffle discard into draw
       if (hand.length < cardsToDraw && rider.discard.length > 0) {
         rider.draw = shuffle(rider.discard);
         rider.discard = [];
