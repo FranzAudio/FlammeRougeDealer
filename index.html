@@ -42,20 +42,22 @@
   <div style="text-align:center;margin-top:30px;"><button id="resetBtn">▶️ Start Game</button></div>
 
   <script>
+    // === Game Logic ===
+
     let turn = 1;
     let state = {};
-    
-//Defines the 6 possible teams, each with a unique color and name.
+
+    //Defines the 6 possible teams, each with a unique color and name.
     const TEAMS = ['Red','Black','Green','Blue','Pink','White'];
     const TEAM_COLORS = ['#d32f2f','#333','#388e3c','#1976d2','#f48fb1','#ccc'];
 
-//Defines the base deck compositions for each rider type and team mode, including special Muscle and Peloton variations.
+    //Defines the base deck compositions for each rider type and team mode, including special Muscle and Peloton variations.
     const DECKS = {
       rouleur: [3,3,3,4,4,4,5,5,5,6,6,6,7,7,7],
       sprinteur: [2,2,2,3,3,3,4,4,4,5,5,5,9,9,9],
       peloton: [3,3,3,4,4,4,5,5,5,6,6,6,7,7,7,'A','A'],
       muscle_rouleur: [3,3,3,4,4,4,5,5,5,6,6,6,7,7,7],
-      muscle_sprinteur: [2,2,2,3,3,3,4,4,4,5,5,5,5,9,9,9]
+      muscle_sprinteur: [2,2,2,3,3,3,4,4,4,5,5,5,"M",9,9,9]
     };
 
     function $id(id) { return document.getElementById(id); }
@@ -72,7 +74,7 @@
       $id('turn-counter').innerText = turn;
     }
 
-//Checks if all active teams have played. Enables the 'Next Turn' button only when everyone has played.
+    //Checks if all active teams have played. Enables the 'Next Turn' button only when everyone has played.
     function checkEndOfTurn() {
       let allPlayed = true;
       for (let team in state) {
@@ -193,8 +195,11 @@
       if (rider.draw.length === 0) return;
       const card = rider.draw.shift();
       rider.banned.push(card);
-      rider.played = card;
-      $id(`${team}-${type}-played`).innerText = `${type.charAt(0).toUpperCase() + type.slice(1)} Played: ${card}`;
+      rider.played = card === "M" ? 5 : card;
+      const label = card === "M"
+        ? "Muscle → Move 5"
+        : `${type.charAt(0).toUpperCase() + type.slice(1)} Played: ${card}`;
+      $id(`${team}-${type}-played`).innerText = label;
       updateInfo(team, type);
       checkEndOfTurn();
     }
@@ -240,6 +245,8 @@
         if (opt) opt.disabled = count > 0 && s.value !== 'peloton';
       });
     }
+
+    // === UI Logic ===
 
     function renderSection(team, type, container) {
       state[team][type] = {
