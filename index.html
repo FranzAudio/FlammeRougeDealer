@@ -29,13 +29,15 @@
 </head>
 <body>
   <h1>Flamme Rouge - Card Dealer (6 Teams)</h1>
-  <div id="turn-display" style="text-align:center;font-weight:bold;margin-bottom:10px; display: none;">
-    Turn: <span id="turn-counter">1</span>
-    <button id="nextTurnBtn" style="margin-left: 20px;">➡️ Next Turn</button>
-  </div>
-  <div class="teams-container">
-    <div id="left-column" class="column"></div>
-    <div id="right-column" class="column"></div>
+  <div id="game-interface" style="display:none;">
+    <div id="turn-display" style="text-align:center;font-weight:bold;margin-bottom:10px; display: none;">
+      Turn: <span id="turn-counter">1</span>
+      <button id="nextTurnBtn" style="margin-left: 20px;">➡️ Next Turn</button>
+    </div>
+    <div class="teams-container">
+      <div id="left-column" class="column"></div>
+      <div id="right-column" class="column"></div>
+    </div>
   </div>
   <div style="text-align:center;margin-top:30px;"><button id="resetBtn">▶️ Start Game</button></div>
 
@@ -274,7 +276,8 @@
       } else if (mode === 'peloton') {
         renderSection(team, 'peloton', div);
       } else {
-        const p = document.createElement('p'); p.className = 'section'; p.innerText = 'Team is inactive'; div.appendChild(p);
+        const p = document.createElement('p'); p.className = 'section'; p.innerText = 'Select a mode to activate this team.';
+        div.appendChild(p);
       }
       validatePeloton();
     }
@@ -320,8 +323,14 @@
     window.addEventListener('load', initApp);
     $id('resetBtn').addEventListener('click', () => {
       $id('resetBtn').innerText = '🔄 Reset Game';
+      $id('game-interface').style.display = 'block';
       initApp();
     });
   </script>
+
+  <footer style="text-align:center; margin-top:40px; font-size:0.9em; color:#666;">
+    <p>Created by Franz Audiø — franz.audio@gmail.com</p>
+    <p><em>This is a fan-made utility for use with the board game Flamme Rouge. All rights to Flamme Rouge and its associated assets belong to their respective copyright holders. No infringement intended.</em></p>
+  </footer>
 </body>
 </html>
