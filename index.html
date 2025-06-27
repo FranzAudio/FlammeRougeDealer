@@ -159,6 +159,32 @@
 
     function resolveAttack() { return { front: 2, back: 9 }; }
 
+    // === Rider Factory ===
+    // Encapsulates rider state, decks, and modifiers in one object.
+    /**
+     * @param {string} type   – 'rouleur' | 'sprinteur' | 'peloton' | 'muscle'
+     * @param {string} mode   – 'human' | 'peloton' | 'muscle'
+     * @returns {object}      – New rider with draw pile, discard, flags, etc.
+     */
+    function createRider(type, mode) {
+      return {
+        type,
+        mode,
+        draw: makeDeck(type, mode),
+        discard: [],
+        banned: [],
+        hand: [],
+        played: null,
+        tailwind: false,
+        headwind: false,
+        // Reset weather modifiers so they only apply once
+        resetModifiers() {
+          this.tailwind = false;
+          this.headwind = false;
+        }
+      };
+    }
+
     function drawHuman(team, type) {
       const other = type === 'rouleur' ? 'sprinteur' : 'rouleur';
       const otherRider = state[team]?.[other];
@@ -293,15 +319,8 @@
     // === UI Logic ===
 
     function renderSection(team, type, container) {
-      state[team][type] = {
-        draw: makeDeck(type, state[team].mode),
-        discard: [],
-        banned: [],
-        hand: [],
-        played: null
-      };
-      state[team][type].tailwind = false;
-      state[team][type].headwind = false;
+      // Initialize rider state via factory
+      state[team][type] = createRider(type, state[team].mode);
       
       const sec = document.createElement('div');
       sec.className = 'section';
