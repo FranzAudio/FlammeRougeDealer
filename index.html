@@ -30,7 +30,24 @@
     .team.White::before { background-image: url('https://i.pinimg.com/736x/ac/80/57/ac8057d326815682c89a97771572177d.jpg'); }
     .team-header { padding: 10px; color: #fff; font-weight: bold; text-align: center; border-radius: 6px; margin-bottom: 10px; }
     .cards { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-    .card { background: #eee; padding: 10px 15px; border-radius: 6px; cursor: pointer; user-select: none; }
+    .card {
+      background: white;
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 2px solid #999;
+      font-weight: bold;
+      font-size: 1.4em;
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+      text-align: center;
+      min-width: 40px;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.1s ease;
+    }
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
+    }
     .info { font-size: 0.9em; margin-top: 10px; color: #666; }
     button, select { margin-top: 5px; padding: 8px 12px; }
     .played { text-align: center; margin-top: 10px; font-weight: bold; color: green; }
