@@ -185,6 +185,26 @@
       };
     }
 
+    // === Button Factory ===
+    /**
+     * Creates a button with label, click handler, and optional styling.
+     * @param {string} label – Button text
+     * @param {function} onClick – Click handler
+     * @param {object} opts – Optional settings: { id, className, style, marginLeft, marginRight }
+     * @returns {HTMLButtonElement}
+     */
+    function makeButton(label, onClick, opts = {}) {
+      const btn = document.createElement('button');
+      btn.innerText = label;
+      btn.onclick = onClick;
+      if (opts.id) btn.id = opts.id;
+      if (opts.className) btn.className = opts.className;
+      if (opts.marginLeft) btn.style.marginLeft = opts.marginLeft;
+      if (opts.marginRight) btn.style.marginRight = opts.marginRight;
+      if (opts.style) Object.assign(btn.style, opts.style);
+      return btn;
+    }
+
     function drawHuman(team, type) {
       const other = type === 'rouleur' ? 'sprinteur' : 'rouleur';
       const otherRider = state[team]?.[other];
@@ -334,38 +354,42 @@
       title.innerText = type.charAt(0).toUpperCase() + type.slice(1);
       title.style.margin = '0';
 
-      const btn = document.createElement('button');
-      btn.innerText = state[team].mode === 'human' ? 'Draw 4' : 'Flip Card';
-      btn.onclick = () => draw(team, type);
+      // Draw/Flip button
+      const btn = makeButton(
+        state[team].mode === 'human' ? 'Draw 4' : 'Flip Card',
+        () => draw(team, type)
+      );
 
       titleRow.appendChild(title);
 
       if (state[team].mode === 'human') {
-        const headwind = document.createElement('button');
-        headwind.innerText = 'Headwind -1';
-        headwind.style.marginRight = '10px';
-        headwind.id = `headwind-${team}-${type}`;
-        headwind.onclick = () => {
-          const rs = state[team][type];
-          rs.headwind = !rs.headwind;
-          if (rs.headwind) rs.tailwind = false;
-          headwind.classList.toggle('active', rs.headwind);
-          tailwind.classList.remove('active');
-          rs.tailwind = false;
-        };
-
-        const tailwind = document.createElement('button');
-        tailwind.innerText = 'Tailwind +1';
-        tailwind.style.marginLeft = '10px';
-        tailwind.id = `tailwind-${team}-${type}`;
-        tailwind.onclick = () => {
-          const rs = state[team][type];
-          rs.tailwind = !rs.tailwind;
-          if (rs.tailwind) rs.headwind = false;
-          tailwind.classList.toggle('active', rs.tailwind);
-          headwind.classList.remove('active');
-          rs.headwind = false;
-        };
+        // Headwind button
+        let headwind, tailwind;
+        headwind = makeButton(
+          'Headwind -1',
+          () => {
+            const rs = state[team][type];
+            rs.headwind = !rs.headwind;
+            if (rs.headwind) rs.tailwind = false;
+            headwind.classList.toggle('active', rs.headwind);
+            tailwind.classList.remove('active');
+            rs.tailwind = false;
+          },
+          { id: `headwind-${team}-${type}`, marginRight: '10px' }
+        );
+        // Tailwind button
+        tailwind = makeButton(
+          'Tailwind +1',
+          () => {
+            const rs = state[team][type];
+            rs.tailwind = !rs.tailwind;
+            if (rs.tailwind) rs.headwind = false;
+            tailwind.classList.toggle('active', rs.tailwind);
+            headwind.classList.remove('active');
+            rs.headwind = false;
+          },
+          { id: `tailwind-${team}-${type}`, marginLeft: '10px' }
+        );
 
         titleRow.appendChild(headwind);
         titleRow.appendChild(btn);
@@ -375,10 +399,11 @@
       }
 
       if (state[team].mode === 'human') {
-        const exh = document.createElement('button');
-        exh.innerText = '+Exh';
-        exh.style.marginLeft = '10px';
-        exh.onclick = () => addExhaust(team, type);
+        const exh = makeButton(
+          '+Exh',
+          () => addExhaust(team, type),
+          { marginLeft: '10px' }
+        );
         titleRow.appendChild(exh);
       }
 
