@@ -48,6 +48,10 @@
       transform: scale(1.05);
       box-shadow: 3px 3px 8px rgba(0,0,0,0.3);
     }
+    button.active {
+      background-color: #555;
+      color: #fff;
+    }
     .info { font-size: 0.9em; margin-top: 10px; color: #666; }
     button, select { margin-top: 5px; padding: 8px 12px; }
     .played { text-align: center; margin-top: 10px; font-weight: bold; color: green; }
@@ -157,16 +161,29 @@
 
     function drawHuman(team, type) {
       const other = type === 'rouleur' ? 'sprinteur' : 'rouleur';
-      const otherRider = state[team][other];
-
-      // Rule: Cannot draw if the other rider has drawn and not played yet
-      if (otherRider && otherRider.hand.length > 0 && otherRider.played === null) {
+      const otherRider = state[team]?.[other];
+      // Rule: Cannot draw if the other rider (same team, mode human) has drawn and not played yet
+      if (
+        state[team].mode === 'human' &&
+        otherRider &&
+        otherRider.hand.length > 0 &&
+        otherRider.played === null
+      ) {
         alert(`You must play the ${other} card before drawing for the ${type}.`);
         return;
       }
 
       const rider = state[team][type];
-      const cardsToDraw = 4;
+      let cardsToDraw = 4;
+      if (rider.tailwind) cardsToDraw += 1;
+      if (rider.headwind) cardsToDraw -= 1;
+      rider.tailwind = false;
+      rider.headwind = false;
+      // Remove the visual "active" state from wind buttons if present
+      const hwBtn = document.getElementById(`headwind-${team}-${type}`);
+      const twBtn = document.getElementById(`tailwind-${team}-${type}`);
+      if (hwBtn) hwBtn.classList.remove('active');
+      if (twBtn) twBtn.classList.remove('active');
       let hand = [];
 
       // 1. Try drawing from the draw pile
@@ -283,6 +300,9 @@
         hand: [],
         played: null
       };
+      state[team][type].tailwind = false;
+      state[team][type].headwind = false;
+      
       const sec = document.createElement('div');
       sec.className = 'section';
 
@@ -300,7 +320,40 @@
       btn.onclick = () => draw(team, type);
 
       titleRow.appendChild(title);
-      titleRow.appendChild(btn);
+
+      if (state[team].mode === 'human') {
+        const headwind = document.createElement('button');
+        headwind.innerText = 'Headwind -1';
+        headwind.style.marginRight = '10px';
+        headwind.id = `headwind-${team}-${type}`;
+        headwind.onclick = () => {
+          const rs = state[team][type];
+          rs.headwind = !rs.headwind;
+          if (rs.headwind) rs.tailwind = false;
+          headwind.classList.toggle('active', rs.headwind);
+          tailwind.classList.remove('active');
+          rs.tailwind = false;
+        };
+
+        const tailwind = document.createElement('button');
+        tailwind.innerText = 'Tailwind +1';
+        tailwind.style.marginLeft = '10px';
+        tailwind.id = `tailwind-${team}-${type}`;
+        tailwind.onclick = () => {
+          const rs = state[team][type];
+          rs.tailwind = !rs.tailwind;
+          if (rs.tailwind) rs.headwind = false;
+          tailwind.classList.toggle('active', rs.tailwind);
+          headwind.classList.remove('active');
+          rs.headwind = false;
+        };
+
+        titleRow.appendChild(headwind);
+        titleRow.appendChild(btn);
+        titleRow.appendChild(tailwind);
+      } else {
+        titleRow.appendChild(btn);
+      }
 
       if (state[team].mode === 'human') {
         const exh = document.createElement('button');
