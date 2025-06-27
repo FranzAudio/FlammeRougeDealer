@@ -205,6 +205,30 @@
       return btn;
     }
 
+    // === Draw Helper ===
+    /**
+     * Draws up to `count` cards from a rider, reshuffling discard if needed.
+     * @param {object} rider – Rider state object
+     * @param {number} count – Number of cards to draw
+     * @returns {Array}      – Array of drawn cards
+     */
+    function drawCards(rider, count) {
+      const result = [];
+      // Draw until desired count or deck empty
+      while (result.length < count && rider.draw.length > 0) {
+        result.push(rider.draw.shift());
+      }
+      // If not enough cards, reshuffle discard into draw
+      if (result.length < count && rider.discard.length > 0) {
+        rider.draw = shuffle(rider.discard);
+        rider.discard = [];
+        while (result.length < count && rider.draw.length > 0) {
+          result.push(rider.draw.shift());
+        }
+      }
+      return result;
+    }
+
     function drawHuman(team, type) {
       const other = type === 'rouleur' ? 'sprinteur' : 'rouleur';
       const otherRider = state[team]?.[other];
@@ -230,24 +254,8 @@
       const twBtn = document.getElementById(`tailwind-${team}-${type}`);
       if (hwBtn) hwBtn.classList.remove('active');
       if (twBtn) twBtn.classList.remove('active');
-      let hand = [];
-
-      // 1. Try drawing from the draw pile
-      while (hand.length < cardsToDraw && rider.draw.length > 0) {
-        hand.push(rider.draw.shift());
-      }
-
-      // 2. If there are not enough cards, reshuffle discard into draw
-      if (hand.length < cardsToDraw && rider.discard.length > 0) {
-        rider.draw = shuffle(rider.discard);
-        rider.discard = [];
-
-        // 3. Draw remaining needed cards
-        while (hand.length < cardsToDraw && rider.draw.length > 0) {
-          hand.push(rider.draw.shift());
-        }
-      }
-
+      // Draw hand using unified helper
+      const hand = drawCards(rider, cardsToDraw);
       rider.hand = hand;
 
       // Display logic
@@ -268,8 +276,9 @@
 
     function drawPeloton(team) {
       const rider = state[team].peloton;
-      if (rider.draw.length === 0) return;
-      const card = rider.draw.shift();
+      const drawn = drawCards(rider, 1);
+      if (drawn.length === 0) return;
+      const card = drawn[0];
       rider.banned.push(card);
       const txt = card === 'A'
         ? `Attack → Front: ${resolveAttack().front}, Back: ${resolveAttack().back}`
@@ -282,8 +291,9 @@
 
     function drawMuscle(team, type) {
       const rider = state[team][type];
-      if (rider.draw.length === 0) return;
-      const card = rider.draw.shift();
+      const drawn = drawCards(rider, 1);
+      if (drawn.length === 0) return;
+      const card = drawn[0];
       rider.banned.push(card);
       rider.played = card === "M" ? 5 : card;
       const label = card === "M"
