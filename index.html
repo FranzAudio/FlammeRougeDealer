@@ -193,7 +193,7 @@
       rider.banned.push(card);
       const txt = card === 'A'
         ? `Attack → Front: ${resolveAttack().front}, Back: ${resolveAttack().back}`
-        : `Peloton Played: ${card}`;
+        : `Peloton moves: ${card}`;
       rider.played = card;
       $id(`${team}-peloton-played`).innerText = txt;
       updateInfo(team, 'peloton');
@@ -208,7 +208,7 @@
       rider.played = card === "M" ? 5 : card;
       const label = card === "M"
         ? "Muscle → Move 5"
-        : `${type.charAt(0).toUpperCase() + type.slice(1)} Played: ${card}`;
+        : `${type.charAt(0).toUpperCase() + type.slice(1)} moves: ${card}`;
       $id(`${team}-${type}-played`).innerText = label;
       updateInfo(team, type);
       checkEndOfTurn();
@@ -229,7 +229,7 @@
       rider.hand = [];
       rider.played = card;
       $id(`${team}-${type}-cards`).innerHTML = '';
-      $id(`${team}-${type}-played`).innerText = `Human Played: ${card}`;
+      $id(`${team}-${type}-played`).innerText = `${type.charAt(0).toUpperCase() + type.slice(1)} moves: ${card}`;
       updateInfo(team, type);
       checkEndOfTurn();
     }
@@ -268,14 +268,33 @@
       };
       const sec = document.createElement('div');
       sec.className = 'section';
-      const title = document.createElement('h3'); title.innerText = type.charAt(0).toUpperCase() + type.slice(1);
-      const btn = document.createElement('button'); btn.innerText = state[team].mode === 'human' ? 'Draw 4' : 'Flip Card';
+
+      const titleRow = document.createElement('div');
+      titleRow.style.display = 'flex';
+      titleRow.style.alignItems = 'center';
+      titleRow.style.justifyContent = 'space-between';
+
+      const title = document.createElement('h3');
+      title.innerText = type.charAt(0).toUpperCase() + type.slice(1);
+      title.style.margin = '0';
+
+      const btn = document.createElement('button');
+      btn.innerText = state[team].mode === 'human' ? 'Draw 4' : 'Flip Card';
       btn.onclick = () => draw(team, type);
-      sec.append(title, btn);
+
+      titleRow.appendChild(title);
+      titleRow.appendChild(btn);
+
       if (state[team].mode === 'human') {
-        const exh = document.createElement('button'); exh.innerText = '+Exh'; exh.onclick = () => addExhaust(team, type);
-        sec.appendChild(exh);
+        const exh = document.createElement('button');
+        exh.innerText = '+Exh';
+        exh.style.marginLeft = '10px';
+        exh.onclick = () => addExhaust(team, type);
+        titleRow.appendChild(exh);
       }
+
+      sec.appendChild(titleRow);
+
       const cardsDiv = document.createElement('div'); cardsDiv.className = 'cards'; cardsDiv.id = `${team}-${type}-cards`;
       const playedDiv = document.createElement('div'); playedDiv.className = 'played'; playedDiv.id = `${team}-${type}-played`;
       const infoDiv = document.createElement('div'); infoDiv.className = 'info'; infoDiv.id = `${team}-${type}-info`;
